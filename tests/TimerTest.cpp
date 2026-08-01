@@ -1,5 +1,5 @@
 #include "Core/Timer.h"
-#include <chrono>
+#include <chrono> // IWYU pragma: keep
 #include <gtest/gtest.h>
 #include <thread>
 

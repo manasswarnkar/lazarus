@@ -5,7 +5,7 @@
 #if defined(_MSC_VER)
 #define ENGINE_DEBUGBREAK() __debugbreak()
 #elif defined(__GNUC__) || defined(__clang__)
-#include <csignal>
+#include <csignal> // IWYU pragma: keep
 #define ENGINE_DEBUGBREAK() raise(SIGTRAP)
 #else
 #error "ENGINE_DEBUGBREAK not implemented for this platform"
