@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.4.2)
+cmake_minimum_required(VERSION 3.20)
 
 project(MyProject
     VERSION 0.1.0
@@ -8,7 +8,19 @@ project(MyProject
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+add_subdirectory(src/Engine)
 
 add_executable(MyProject
-    src/main.cpp
+    src/Main.cpp
 )
+
+target_link_libraries(MyProject PRIVATE Engine)
+
+
+option(BUILD_TESTS "Build unit tests" ON)
+if(BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
