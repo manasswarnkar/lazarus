@@ -1,12 +1,14 @@
 set(ENGINE_SOURCES
     Core/Logger.cpp
     Core/Timer.cpp
+    Core/LinearAllocator.cpp
 )
 
 set(ENGINE_HEADERS
     Core/Logger.h
     Core/Timer.h
     Core/Assert.h
+    Core/LinearAllocator.h
 )
 
 add_library(Engine STATIC
