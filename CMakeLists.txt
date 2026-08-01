@@ -18,6 +18,9 @@ add_executable(MyProject
 
 target_link_libraries(MyProject PRIVATE Engine)
 
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+endif()
 
 option(BUILD_TESTS "Build unit tests" ON)
 if(BUILD_TESTS)
