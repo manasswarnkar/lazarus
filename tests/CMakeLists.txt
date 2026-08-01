@@ -13,6 +13,7 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(EngineTests
     TimerTest.cpp
+    AssertTest.cpp
 )
 
 target_link_libraries(EngineTests

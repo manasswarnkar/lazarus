@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Logger.h"
-#include <string>
+#include <cstdio>
 
 #if defined(_MSC_VER)
 #define ENGINE_DEBUGBREAK() __debugbreak()
@@ -16,12 +15,10 @@ namespace Engine::Core::Detail {
 
 inline void AssertFailed(const char *expr, const char *file, int line,
                          const char *message) {
-  Logger::Error(("Assertion failed: " + std::string(expr) +
-                 "\n  File: " + file + ":" + std::to_string(line) +
-                 "\n  Message: " + (message ? message : "(none)"))
-                    .c_str());
+  std::fprintf(stderr, "Assertion failed: %s\n  File: %s:%d\n  Message: %s\n",
+               expr, file, line, message ? message : "(none)");
+  std::fflush(stderr);
 }
-
 } // namespace Engine::Core::Detail
 
 // ENGINE_ASSERT: checked ONLY in debug builds. Condition is not evaluated

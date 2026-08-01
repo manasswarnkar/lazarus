@@ -1,4 +1,5 @@
 #include "Timer.h"
+#include "Assert.h"
 
 namespace Engine::Core {
 // ---------- Stopwatch ----------
@@ -34,6 +35,9 @@ void Time::Update() {
   }
 
   s_DeltaTime = std::chrono::duration<double>(now - s_LastFrameTime).count();
+  ENGINE_ASSERT(s_DeltaTime >= 0.0,
+                "DeltaTime went negative — clock is not monotonic!");
+
   s_LastFrameTime = now;
   ++s_FrameCount;
 }
@@ -41,6 +45,9 @@ void Time::Update() {
 double Time::DeltaTime() { return s_DeltaTime; }
 
 double Time::TotalTime() {
+  ENGINE_ASSERT(s_Initialized,
+                "Time::TotalTime called before first Time::Update()");
+
   return std::chrono::duration<double>(Clock::now() - s_StartTime).count();
 }
 
