@@ -1,6 +1,8 @@
 #pragma once
 
+#include "Events/Event.h"
 #include <cstdint>
+#include <functional>
 #include <string>
 
 struct GLFWwindow;
@@ -17,6 +19,8 @@ struct WindowProps {
 // RAII wrapper around a GLFW window + OpenGL context.
 class Window {
 public:
+  using EventCallbackFn = std::function<void(Events::Event &)>;
+
   explicit Window(const WindowProps &props = WindowProps());
   ~Window();
 
@@ -34,6 +38,10 @@ public:
   void SetVSync(bool enabled);
   bool IsVSync() const { return m_Data.VSync; }
 
+  void SetEventCallback(const EventCallbackFn &callback) {
+    m_Data.EventCallback = callback;
+  }
+
   void *GetNativeWindow() const { return m_Window; }
 
 private:
@@ -46,6 +54,7 @@ private:
     std::string Title;
     uint32_t Width = 0, Height = 0;
     bool VSync = true;
+    EventCallbackFn EventCallback;
   };
   WindowData m_Data;
 };

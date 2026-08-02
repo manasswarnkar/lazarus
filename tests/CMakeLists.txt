@@ -15,6 +15,7 @@ add_executable(EngineTests
     TimerTest.cpp
     AssertTest.cpp
     LinearAllocatorTest.cpp
+    EventTest.cpp
 )
 
 target_link_libraries(EngineTests

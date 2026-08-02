@@ -38,6 +38,8 @@ set(ENGINE_HEADERS
     Core/Assert.h
     Core/LinearAllocator.h
     Platform/Window.h
+    Events/Event.h
+    Events/ApplicationEvent.h
 )
 
 add_library(Engine STATIC

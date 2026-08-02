@@ -1,18 +1,38 @@
 #include "Core/Logger.h"
 #include "Core/Timer.h"
+#include "Events/ApplicationEvent.h"
+#include "Events/Event.h"
 #include "Platform/Window.h"
 
 #include "glad/gl.h"
 
 using namespace Engine::Core;
 using namespace Engine::Platform;
+using namespace Engine::Events;
 
 int main() {
   Logger::Info("Engine starting...");
 
+  bool running = true;
+
   Window window({"Lazarus Engine", 1280, 720, true});
 
-  while (!window.ShouldClose()) {
+  window.SetEventCallback([&](Event &e) {
+    EventDispatcher dispatcher(e);
+
+    dispatcher.Dispatch<WindowCloseEvent>([&](WindowCloseEvent &) {
+      Logger::Info("Window close requested.");
+      running = false;
+      return true;
+    });
+
+    // dispatcher.Dispatch<WindowResizeEvent>([](WindowResizeEvent &re) {
+    //   Logger::Info(re.ToString().c_str());
+    //   return true;
+    // });
+  });
+
+  while (running && !window.ShouldClose()) {
     Time::Update();
 
     glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
@@ -22,6 +42,5 @@ int main() {
   }
 
   Logger::Info("Engine shutting down.");
-
   return 0;
 }

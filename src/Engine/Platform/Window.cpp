@@ -1,6 +1,7 @@
 #include "Window.h"
 #include "Core/Assert.h"
 #include "Core/Logger.h"
+#include "Events/ApplicationEvent.h"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -20,14 +21,6 @@ int s_WindowCount = 0;
 // coordinates) changes size — the correct callback to resize the GL
 // viewport from, since it accounts for HiDPI/Retina scaling that
 // glfwSetWindowSizeCallback would not.
-void FramebufferSizeCallback(GLFWwindow *window, int width, int height) {
-  auto *data =
-      static_cast<Engine::Platform::Window *>(glfwGetWindowUserPointer(window));
-  (void)data; // width/height applied directly below; data reserved for
-              // future use (e.g. dispatching a WindowResizeEvent)
-
-  glViewport(0, 0, width, height);
-}
 
 } // namespace
 
@@ -60,7 +53,7 @@ void Window::Init(const WindowProps &props) {
   ENGINE_ASSERT(m_Window != nullptr, "Failed to create GLFW window");
   ++s_WindowCount;
 
-  glfwSetWindowUserPointer(m_Window, this);
+  glfwSetWindowUserPointer(m_Window, &m_Data);
 
   glfwMakeContextCurrent(m_Window);
 
@@ -74,15 +67,6 @@ void Window::Init(const WindowProps &props) {
   glfwGetFramebufferSize(m_Window, &fbWidth, &fbHeight);
   glViewport(0, 0, fbWidth, fbHeight);
 
-  glfwSetFramebufferSizeCallback(m_Window, FramebufferSizeCallback);
-
-  glfwSetWindowSizeCallback(m_Window, [](GLFWwindow *window, int width,
-                                         int height) {
-    auto *win = static_cast<Window *>(glfwGetWindowUserPointer(window));
-    win->m_Data.Width = static_cast<uint32_t>(width);
-    win->m_Data.Height = static_cast<uint32_t>(height);
-  });
-
   Core::Logger::Info((std::string("Created window: ") + m_Data.Title + " (" +
                       std::to_string(m_Data.Width) + "x" +
                       std::to_string(m_Data.Height) + ")")
@@ -92,6 +76,37 @@ void Window::Init(const WindowProps &props) {
                          .c_str());
 
   SetVSync(m_Data.VSync);
+
+
+  // --- GLFW callbacks: translate raw GLFW notifications into engine Events ---
+
+  glfwSetFramebufferSizeCallback(
+      m_Window, [](GLFWwindow *window, int width, int height) {
+        glViewport(0, 0, width, height);
+      });
+
+  glfwSetWindowSizeCallback(
+      m_Window, [](GLFWwindow *window, int width, int height) {
+        auto &data =
+            *static_cast<WindowData *>(glfwGetWindowUserPointer(window));
+        data.Width = static_cast<uint32_t>(width);
+        data.Height = static_cast<uint32_t>(height);
+
+        Events::WindowResizeEvent event(data.Width, data.Height);
+        if (data.EventCallback) {
+          data.EventCallback(event);
+        }
+      });
+
+  glfwSetWindowCloseCallback(m_Window, [](GLFWwindow *window) {
+    auto &data =
+        *static_cast<WindowData *>(glfwGetWindowUserPointer(window));
+
+    Events::WindowCloseEvent event;
+    if (data.EventCallback) {
+      data.EventCallback(event);
+    }
+  });
 }
 
 void Window::Shutdown() {
