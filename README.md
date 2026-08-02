@@ -5,8 +5,8 @@ engine architecture and coding patterns.
 
 ## Status
 
-Actively in development. Core foundational systems are in place; windowing
-and rendering are in progress.
+Phase 0 (Foundation) and Phase 1 (Platform & Windowing) complete. Starting
+Phase 2 (Rendering Foundation) next.
 
 ## Features
 
@@ -24,20 +24,31 @@ and rendering are in progress.
   `stderr`.
 - **LinearAllocator** — Bump-pointer allocator for fast, contiguous scratch
   allocations with O(1) bulk reset. Alignment-aware; move-only.
+- **Window** — RAII wrapper around a GLFW window and OpenGL 4.5 core context.
+  Handles resize (framebuffer + window-size callbacks), correct HiDPI
+  viewport sizing, and clean GLFW init/terminate across multiple windows.
+- **Events** — Dispatcher-based event system (`Event`, `EventDispatcher`,
+  category/type flags). `WindowResizeEvent`, `WindowCloseEvent`,
+  `Key*Event`, `Mouse*Event` all flow through a single `EventCallbackFn`
+  set on `Window`.
+- **Input** — Static, polling-friendly key/mouse state (`Input::IsKeyPressed`,
+  `Input::GetMousePosition`, etc.), populated by `Window`'s GLFW callbacks.
+  No GLFW dependency of its own — pure cached state.
 
 ### Planned
 
-- **Window** — RAII wrapper around a GLFW window and OpenGL context (next up).
-
-See the full [roadmap](#roadmap) below for everything after that.
+See the full [roadmap](#roadmap) below.
 
 ## Building
 
 ### Requirements
 
 - CMake 3.20+
-- A C++23 compiler (GCC or Clang recommended)
-- Git (for fetching dependencies via `FetchContent`)
+- A C++23 **and** C compiler (GCC or Clang recommended) — GLFW/GLAD are C
+  libraries
+- Git (for fetching dependencies via `FetchContent`: GoogleTest, GLFW, GLAD)
+- On Linux: X11/Wayland development packages for GLFW (auto-detected by
+  CMake at configure time)
 
 ### Build
 
@@ -72,23 +83,33 @@ ctest --test-dir build --output-on-failure
 ├── include/                    # Third-party / vendored headers
 ├── src/
 │   ├── Engine/
-│   │   ├── CMakeLists.txt      # Engine static library target
-│   │   └── Core/               # Foundational, dependency-free systems
-│   │       ├── Logger.h / .cpp
-│   │       ├── Timer.h / .cpp
-│   │       ├── Assert.h
-│   │       └── LinearAllocator.h / .cpp
-│   └── Main.cpp                 # Application entry point
+│   │   ├── CMakeLists.txt      # Engine static library target (links GLFW, GLAD)
+│   │   ├── Core/                # Foundational, dependency-free systems
+│   │   │   ├── Logger.h / .cpp
+│   │   │   ├── Timer.h / .cpp
+│   │   │   ├── Assert.h
+│   │   │   └── LinearAllocator.h / .cpp
+│   │   ├── Platform/             # OS / windowing abstraction
+│   │   │   └── Window.h / .cpp
+│   │   ├── Events/                # Event types + dispatcher
+│   │   │   ├── Event.h
+│   │   │   ├── ApplicationEvent.h
+│   │   │   ├── KeyEvent.h
+│   │   │   └── MouseEvent.h
+│   │   └── Input/                 # Polling-based input state
+│   │       ├── KeyCodes.h
+│   │       ├── MouseCodes.h
+│   │       └── Input.h / .cpp
+│   └── Main.cpp                   # Application entry point
 ├── tests/
-│   ├── CMakeLists.txt           # GoogleTest-based test suite
+│   ├── CMakeLists.txt             # GoogleTest-based test suite
 │   ├── TimerTest.cpp
 │   ├── AssertTest.cpp
-│   └── LinearAllocatorTest.cpp
-└── third_party/                 # Vendored / fetched dependencies
+│   ├── LinearAllocatorTest.cpp
+│   ├── EventTest.cpp
+│   └── InputTest.cpp
+└── third_party/                   # Vendored / fetched dependencies
 ```
-
-> `Platform/Window` (GLFW-based windowing) is planned next and not yet
-> present in the tree — see [Roadmap](#roadmap).
 
 ## Design principles
 
@@ -116,10 +137,11 @@ required. Each subsystem has a corresponding `<Subsystem>Test.cpp` file in
 High-level phased plan, roughly in dependency order:
 
 - **Phase 0 — Foundation:** Logger ✅, Timer ✅, Assert ✅, LinearAllocator ✅,
-  Config system
-- **Phase 1 — Platform & Windowing:** Window (next), Input, Event system
-- **Phase 2 — Rendering Foundation:** Graphics API abstraction, renderer
-  core, shaders, buffers/textures, camera, mesh loading, materials
+  Config system (deferred)
+- **Phase 1 — Platform & Windowing:** Window ✅, Events ✅, Input ✅
+- **Phase 2 — Rendering Foundation (next):** buffer/shader wrapper classes,
+  minimal `Renderer` (`BeginScene`/`Submit`/`EndScene`), first triangle,
+  camera (orthographic first), textures, materials, mesh loading
 - **Phase 3 — Core Architecture:** ECS, scene/world management, resource
   manager, serialization
 - **Phase 4 — Gameplay Systems:** Scripting, physics, audio, animation, UI
