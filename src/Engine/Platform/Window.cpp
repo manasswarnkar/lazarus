@@ -2,6 +2,9 @@
 #include "Core/Assert.h"
 #include "Core/Logger.h"
 #include "Events/ApplicationEvent.h"
+#include "Events/KeyEvent.h"
+#include "Events/MouseEvent.h"
+#include "Input/Input.h"
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -77,35 +80,100 @@ void Window::Init(const WindowProps &props) {
 
   SetVSync(m_Data.VSync);
 
-
   // --- GLFW callbacks: translate raw GLFW notifications into engine Events ---
 
-  glfwSetFramebufferSizeCallback(
-      m_Window, [](GLFWwindow *window, int width, int height) {
-        glViewport(0, 0, width, height);
-      });
+  glfwSetFramebufferSizeCallback(m_Window,
+                                 [](GLFWwindow *window, int width, int height) {
+                                   glViewport(0, 0, width, height);
+                                 });
 
-  glfwSetWindowSizeCallback(
-      m_Window, [](GLFWwindow *window, int width, int height) {
-        auto &data =
-            *static_cast<WindowData *>(glfwGetWindowUserPointer(window));
-        data.Width = static_cast<uint32_t>(width);
-        data.Height = static_cast<uint32_t>(height);
+  glfwSetWindowSizeCallback(m_Window, [](GLFWwindow *window, int width,
+                                         int height) {
+    auto &data = *static_cast<WindowData *>(glfwGetWindowUserPointer(window));
+    data.Width = static_cast<uint32_t>(width);
+    data.Height = static_cast<uint32_t>(height);
 
-        Events::WindowResizeEvent event(data.Width, data.Height);
-        if (data.EventCallback) {
-          data.EventCallback(event);
-        }
-      });
+    Events::WindowResizeEvent event(data.Width, data.Height);
+    if (data.EventCallback) {
+      data.EventCallback(event);
+    }
+  });
 
   glfwSetWindowCloseCallback(m_Window, [](GLFWwindow *window) {
-    auto &data =
-        *static_cast<WindowData *>(glfwGetWindowUserPointer(window));
+    auto &data = *static_cast<WindowData *>(glfwGetWindowUserPointer(window));
 
     Events::WindowCloseEvent event;
     if (data.EventCallback) {
       data.EventCallback(event);
     }
+  });
+
+  glfwSetKeyCallback(m_Window, [](GLFWwindow *window, int key, int scancode,
+                                  int action, int mods) {
+    auto &data = *static_cast<WindowData *>(glfwGetWindowUserPointer(window));
+    auto engineKey = static_cast<Input::Key>(key);
+
+    switch (action) {
+    case GLFW_PRESS: {
+      Input::Input::SetKeyState(engineKey, true);
+      Events::KeyPressedEvent event(engineKey, false);
+      if (data.EventCallback)
+        data.EventCallback(event);
+      break;
+    }
+    case GLFW_RELEASE: {
+      Input::Input::SetKeyState(engineKey, false);
+      Events::KeyReleasedEvent event(engineKey);
+      if (data.EventCallback)
+        data.EventCallback(event);
+      break;
+    }
+    case GLFW_REPEAT: {
+      Events::KeyPressedEvent event(engineKey, true);
+      if (data.EventCallback)
+        data.EventCallback(event);
+      break;
+    }
+    }
+  });
+
+  glfwSetMouseButtonCallback(m_Window, [](GLFWwindow *window, int button,
+                                          int action, int mods) {
+    auto &data = *static_cast<WindowData *>(glfwGetWindowUserPointer(window));
+    auto engineButton = static_cast<Input::MouseButton>(button);
+
+    if (action == GLFW_PRESS) {
+      Input::Input::SetMouseButtonState(engineButton, true);
+      Events::MouseButtonPressedEvent event(engineButton);
+      if (data.EventCallback)
+        data.EventCallback(event);
+    } else if (action == GLFW_RELEASE) {
+      Input::Input::SetMouseButtonState(engineButton, false);
+      Events::MouseButtonReleasedEvent event(engineButton);
+      if (data.EventCallback)
+        data.EventCallback(event);
+    }
+  });
+
+  glfwSetCursorPosCallback(m_Window, [](GLFWwindow *window, double xPos,
+                                        double yPos) {
+    auto &data = *static_cast<WindowData *>(glfwGetWindowUserPointer(window));
+    Input::Input::SetMousePosition(static_cast<float>(xPos),
+                                   static_cast<float>(yPos));
+
+    Events::MouseMovedEvent event(static_cast<float>(xPos),
+                                  static_cast<float>(yPos));
+    if (data.EventCallback)
+      data.EventCallback(event);
+  });
+
+  glfwSetScrollCallback(m_Window, [](GLFWwindow *window, double xOffset,
+                                     double yOffset) {
+    auto &data = *static_cast<WindowData *>(glfwGetWindowUserPointer(window));
+    Events::MouseScrolledEvent event(static_cast<float>(xOffset),
+                                     static_cast<float>(yOffset));
+    if (data.EventCallback)
+      data.EventCallback(event);
   });
 }
 

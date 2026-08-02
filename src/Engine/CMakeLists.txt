@@ -30,6 +30,7 @@ set(ENGINE_SOURCES
     Core/Timer.cpp
     Core/LinearAllocator.cpp
     Platform/Window.cpp
+    Input/Input.cpp
 )
 
 set(ENGINE_HEADERS
@@ -40,6 +41,11 @@ set(ENGINE_HEADERS
     Platform/Window.h
     Events/Event.h
     Events/ApplicationEvent.h
+    Events/KeyEvent.h
+    Events/MouseEvent.h
+    Input/KeyCodes.h
+    Input/MouseCodes.h
+    Input/Input.h
 )
 
 add_library(Engine STATIC
