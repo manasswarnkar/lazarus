@@ -18,6 +18,8 @@ add_executable(EngineTests
     EventTest.cpp
     InputTest.cpp
     BufferLayoutTest.cpp
+    ViewportMathTest.cpp
+    OrthographicCameraTest.cpp
 )
 
 target_link_libraries(EngineTests

@@ -1,6 +1,7 @@
 #include "Window.h"
 #include "Core/Assert.h"
 #include "Core/Logger.h"
+#include "Core/ViewportMath.h"
 #include "Events/ApplicationEvent.h"
 #include "Events/KeyEvent.h"
 #include "Events/MouseEvent.h"
@@ -23,33 +24,10 @@ int s_WindowCount = 0;
 // Computes a letterboxed/pillarboxed viewport for the given framebuffer
 // size and target aspect ratio, then applies it via glViewport.
 // If targetAspect <= 0, the viewport fills the entire framebuffer.
-void ApplyLetterboxedViewport(int fbWidth, int fbHeight, float targetAspect) {
-  if (targetAspect <= 0.0f || fbWidth <= 0 || fbHeight <= 0) {
-    glViewport(0, 0, fbWidth, fbHeight);
-    return;
-  }
-
-  float windowAspect =
-      static_cast<float>(fbWidth) / static_cast<float>(fbHeight);
-
-  int viewportX = 0, viewportY = 0;
-  int viewportWidth = fbWidth, viewportHeight = fbHeight;
-
-  if (windowAspect > targetAspect) {
-    // Window is wider than target — bars on left/right (pillarbox).
-    viewportHeight = fbHeight;
-    viewportWidth = static_cast<int>(fbHeight * targetAspect);
-    viewportX = (fbWidth - viewportWidth) / 2;
-    viewportY = 0;
-  } else {
-    // Window is taller than target — bars on top/bottom (letterbox).
-    viewportWidth = fbWidth;
-    viewportHeight = static_cast<int>(fbWidth / targetAspect);
-    viewportX = 0;
-    viewportY = (fbHeight - viewportHeight) / 2;
-  }
-
-  glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
+void ApplyViewport(int fbWidth, int fbHeight, float targetAspect) {
+  auto rect =
+      Engine::Core::ComputeLetterboxedViewport(fbWidth, fbHeight, targetAspect);
+  glViewport(rect.X, rect.Y, rect.Width, rect.Height);
 }
 
 } // namespace
@@ -95,7 +73,7 @@ void Window::Init(const WindowProps &props) {
   // may differ from the requested window size).
   int fbWidth, fbHeight;
   glfwGetFramebufferSize(m_Window, &fbWidth, &fbHeight);
-  ApplyLetterboxedViewport(fbWidth, fbHeight, m_Data.TargetAspectRatio);
+  ApplyViewport(fbWidth, fbHeight, m_Data.TargetAspectRatio);
 
   Core::Logger::Info((std::string("Created window: ") + m_Data.Title + " (" +
                       std::to_string(m_Data.Width) + "x" +
@@ -112,7 +90,7 @@ void Window::Init(const WindowProps &props) {
   glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow *window, int width,
                                               int height) {
     auto &data = *static_cast<WindowData *>(glfwGetWindowUserPointer(window));
-    ApplyLetterboxedViewport(width, height, data.TargetAspectRatio);
+    ApplyViewport(width, height, data.TargetAspectRatio);
   });
 
   glfwSetWindowSizeCallback(m_Window, [](GLFWwindow *window, int width,
@@ -211,7 +189,7 @@ void Window::LockAspectRatio(float aspectRatio) {
   if (m_Window) {
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(m_Window, &fbWidth, &fbHeight);
-    ApplyLetterboxedViewport(fbWidth, fbHeight, m_Data.TargetAspectRatio);
+    ApplyViewport(fbWidth, fbHeight, m_Data.TargetAspectRatio);
   }
 }
 
