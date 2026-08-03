@@ -17,6 +17,7 @@ add_executable(EngineTests
     LinearAllocatorTest.cpp
     EventTest.cpp
     InputTest.cpp
+    BufferLayoutTest.cpp
 )
 
 target_link_libraries(EngineTests
