@@ -31,6 +31,9 @@ set(ENGINE_SOURCES
     Core/LinearAllocator.cpp
     Platform/Window.cpp
     Input/Input.cpp
+    Renderer/Buffer.cpp
+    Renderer/Shader.cpp
+    Renderer/VertexArray.cpp
 )
 
 set(ENGINE_HEADERS
@@ -46,6 +49,9 @@ set(ENGINE_HEADERS
     Input/KeyCodes.h
     Input/MouseCodes.h
     Input/Input.h
+    Renderer/Buffer.h
+    Renderer/Shader.h
+    Renderer/VertexArray.h
 )
 
 add_library(Engine STATIC
