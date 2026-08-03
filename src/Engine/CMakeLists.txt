@@ -25,6 +25,14 @@ FetchContent_MakeAvailable(glad)
 glad_add_library(glad_gl_core STATIC API gl:core=4.5)
 
 
+# --- glm ---
+FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG        1.0.1
+)
+FetchContent_MakeAvailable(glm)
+
 set(ENGINE_SOURCES
     Core/Logger.cpp
     Core/Timer.cpp
@@ -32,6 +40,9 @@ set(ENGINE_SOURCES
     Platform/Window.cpp
     Input/Input.cpp
     Renderer/Buffer.cpp
+    Renderer/OrthographicCamera.cpp
+    Renderer/RenderCommand.cpp
+    Renderer/Renderer.cpp
     Renderer/Shader.cpp
     Renderer/VertexArray.cpp
 )
@@ -50,6 +61,9 @@ set(ENGINE_HEADERS
     Input/MouseCodes.h
     Input/Input.h
     Renderer/Buffer.h
+    Renderer/OrthographicCamera.h
+    Renderer/RenderCommand.h
+    Renderer/Renderer.h
     Renderer/Shader.h
     Renderer/VertexArray.h
 )
@@ -61,6 +75,6 @@ add_library(Engine STATIC
 
 target_include_directories(Engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(Engine PUBLIC glfw glad_gl_core)
+target_link_libraries(Engine PUBLIC glfw glad_gl_core glm::glm)
 
 target_compile_features(Engine PUBLIC cxx_std_23)

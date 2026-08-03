@@ -4,10 +4,11 @@
 #include "Events/Event.h"
 #include "Platform/Window.h"
 #include "Renderer/Buffer.h"
+#include "Renderer/OrthographicCamera.h"
+#include "Renderer/RenderCommand.h"
+#include "Renderer/Renderer.h"
 #include "Renderer/Shader.h"
 #include "Renderer/VertexArray.h"
-
-#include "glad/gl.h"
 
 using namespace Engine::Core;
 using namespace Engine::Platform;
@@ -54,8 +55,9 @@ int main() {
   std::string vertexSrc = R"(
     #version 450 core
     layout(location = 0) in vec3 a_Position;
+    uniform mat4 u_ViewProjection;
     void main() {
-      gl_Position = vec4(a_Position, 1.0);
+      gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
     }
   )";
 
@@ -67,18 +69,18 @@ int main() {
     }
   )";
 
-  Shader shader(vertexSrc, fragmentSrc);
+  auto shader = std::make_shared<Shader>(vertexSrc, fragmentSrc);
+  OrthographicCamera camera(-1.6f, 1.6f, -0.9f, 0.9f); // 16:9 aspect
 
   while (running && !window.ShouldClose()) {
     Time::Update();
 
-    glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    RenderCommand::SetClearColor(0.1f, 0.1f, 0.15f, 1.0f);
+    RenderCommand::Clear();
 
-    shader.Bind();
-    vertexArray->Bind();
-    glDrawElements(GL_TRIANGLES, indexBuffer->GetCount(), GL_UNSIGNED_INT,
-                   nullptr);
+    Renderer::BeginScene(camera);
+    Renderer::Submit(shader, vertexArray);
+    Renderer::EndScene();
 
     window.OnUpdate();
   }
