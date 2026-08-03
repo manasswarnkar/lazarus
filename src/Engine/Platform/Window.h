@@ -42,6 +42,12 @@ public:
     m_Data.EventCallback = callback;
   }
 
+  // Locks rendering to a fixed aspect ratio. On resize, the OpenGL
+  // viewport is letterboxed/pillarboxed (black bars) rather than
+  // stretched, so the rendered content's proportions never distort.
+  // Pass 0.0f (default) to disable locking and fill the whole window.
+  void LockAspectRatio(float aspectRatio);
+
   void *GetNativeWindow() const { return m_Window; }
 
 private:
@@ -54,6 +60,7 @@ private:
     std::string Title;
     uint32_t Width = 0, Height = 0;
     bool VSync = true;
+    float TargetAspectRatio = 0.0f; // 0 = unlocked, fill window
     EventCallbackFn EventCallback;
   };
   WindowData m_Data;

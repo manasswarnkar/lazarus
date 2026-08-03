@@ -20,10 +20,37 @@ void GLFWErrorCallback(int error, const char *description) {
 bool s_GLFWInitialized = false;
 int s_WindowCount = 0;
 
-// Called whenever the actual framebuffer (in pixels, not screen
-// coordinates) changes size — the correct callback to resize the GL
-// viewport from, since it accounts for HiDPI/Retina scaling that
-// glfwSetWindowSizeCallback would not.
+// Computes a letterboxed/pillarboxed viewport for the given framebuffer
+// size and target aspect ratio, then applies it via glViewport.
+// If targetAspect <= 0, the viewport fills the entire framebuffer.
+void ApplyLetterboxedViewport(int fbWidth, int fbHeight, float targetAspect) {
+  if (targetAspect <= 0.0f || fbWidth <= 0 || fbHeight <= 0) {
+    glViewport(0, 0, fbWidth, fbHeight);
+    return;
+  }
+
+  float windowAspect =
+      static_cast<float>(fbWidth) / static_cast<float>(fbHeight);
+
+  int viewportX = 0, viewportY = 0;
+  int viewportWidth = fbWidth, viewportHeight = fbHeight;
+
+  if (windowAspect > targetAspect) {
+    // Window is wider than target — bars on left/right (pillarbox).
+    viewportHeight = fbHeight;
+    viewportWidth = static_cast<int>(fbHeight * targetAspect);
+    viewportX = (fbWidth - viewportWidth) / 2;
+    viewportY = 0;
+  } else {
+    // Window is taller than target — bars on top/bottom (letterbox).
+    viewportWidth = fbWidth;
+    viewportHeight = static_cast<int>(fbWidth / targetAspect);
+    viewportX = 0;
+    viewportY = (fbHeight - viewportHeight) / 2;
+  }
+
+  glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
+}
 
 } // namespace
 
@@ -68,7 +95,7 @@ void Window::Init(const WindowProps &props) {
   // may differ from the requested window size).
   int fbWidth, fbHeight;
   glfwGetFramebufferSize(m_Window, &fbWidth, &fbHeight);
-  glViewport(0, 0, fbWidth, fbHeight);
+  ApplyLetterboxedViewport(fbWidth, fbHeight, m_Data.TargetAspectRatio);
 
   Core::Logger::Info((std::string("Created window: ") + m_Data.Title + " (" +
                       std::to_string(m_Data.Width) + "x" +
@@ -82,10 +109,11 @@ void Window::Init(const WindowProps &props) {
 
   // --- GLFW callbacks: translate raw GLFW notifications into engine Events ---
 
-  glfwSetFramebufferSizeCallback(m_Window,
-                                 [](GLFWwindow *window, int width, int height) {
-                                   glViewport(0, 0, width, height);
-                                 });
+  glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow *window, int width,
+                                              int height) {
+    auto &data = *static_cast<WindowData *>(glfwGetWindowUserPointer(window));
+    ApplyLetterboxedViewport(width, height, data.TargetAspectRatio);
+  });
 
   glfwSetWindowSizeCallback(m_Window, [](GLFWwindow *window, int width,
                                          int height) {
@@ -175,6 +203,16 @@ void Window::Init(const WindowProps &props) {
     if (data.EventCallback)
       data.EventCallback(event);
   });
+}
+
+void Window::LockAspectRatio(float aspectRatio) {
+  m_Data.TargetAspectRatio = aspectRatio;
+
+  if (m_Window) {
+    int fbWidth, fbHeight;
+    glfwGetFramebufferSize(m_Window, &fbWidth, &fbHeight);
+    ApplyLetterboxedViewport(fbWidth, fbHeight, m_Data.TargetAspectRatio);
+  }
 }
 
 void Window::Shutdown() {

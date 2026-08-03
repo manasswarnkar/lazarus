@@ -21,8 +21,8 @@ int main() {
   bool running = true;
 
   Window window({"Lazarus Engine", 1280, 720, true});
-
-  OrthographicCameraController cameraController(1280.0f / 720.0f);
+  window.LockAspectRatio(1280.0f / 720.0f);
+  OrthographicCameraController cameraController(1280.0f / 720.0f, true);
 
   window.SetEventCallback([&](Event &e) {
     EventDispatcher dispatcher(e);

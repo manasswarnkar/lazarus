@@ -40,9 +40,16 @@ void OrthographicCameraController::OnUpdate(float deltaTime) {
 }
 
 void OrthographicCameraController::OnEvent(Events::Event &e) {
-  Events::EventDispatcher dispatcher(e);
-  dispatcher.Dispatch<Events::WindowResizeEvent>(
-      [this](Events::WindowResizeEvent &re) { return OnWindowResized(re); });
+  // Aspect ratio is intentionally NOT recalculated here — Window now
+  // handles aspect correctness via a letterboxed viewport, so the
+  // camera's projection stays fixed regardless of window resize.
+
+  // uncomment if need this later
+
+  //   Events::EventDispatcher dispatcher(e);
+  //   dispatcher.Dispatch<Events::WindowResizeEvent>(
+  //       [this](Events::WindowResizeEvent &re) { return OnWindowResized(re);
+  //       });
 }
 
 bool OrthographicCameraController::OnWindowResized(
