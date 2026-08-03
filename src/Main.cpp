@@ -4,7 +4,7 @@
 #include "Events/Event.h"
 #include "Platform/Window.h"
 #include "Renderer/Buffer.h"
-#include "Renderer/OrthographicCamera.h"
+#include "Renderer/OrthographicCameraController.h"
 #include "Renderer/RenderCommand.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/Shader.h"
@@ -22,6 +22,8 @@ int main() {
 
   Window window({"Lazarus Engine", 1280, 720, true});
 
+  OrthographicCameraController cameraController(1280.0f / 720.0f);
+
   window.SetEventCallback([&](Event &e) {
     EventDispatcher dispatcher(e);
 
@@ -29,6 +31,8 @@ int main() {
       Logger::Info("Window close requested.");
       running = false;
       return true;
+
+      cameraController.OnEvent(e);
     });
 
     // dispatcher.Dispatch<WindowResizeEvent>([](WindowResizeEvent &re) {
@@ -70,15 +74,17 @@ int main() {
   )";
 
   auto shader = std::make_shared<Shader>(vertexSrc, fragmentSrc);
-  OrthographicCamera camera(-1.6f, 1.6f, -0.9f, 0.9f); // 16:9 aspect
 
   while (running && !window.ShouldClose()) {
     Time::Update();
+    float deltaTime = static_cast<float>(Time::DeltaTime());
+
+    cameraController.OnUpdate(deltaTime);
 
     RenderCommand::SetClearColor(0.1f, 0.1f, 0.15f, 1.0f);
     RenderCommand::Clear();
 
-    Renderer::BeginScene(camera);
+    Renderer::BeginScene(cameraController.GetCamera());
     Renderer::Submit(shader, vertexArray);
     Renderer::EndScene();
 

@@ -41,6 +41,7 @@ set(ENGINE_SOURCES
     Input/Input.cpp
     Renderer/Buffer.cpp
     Renderer/OrthographicCamera.cpp
+    Renderer/OrthographicCameraController.cpp
     Renderer/RenderCommand.cpp
     Renderer/Renderer.cpp
     Renderer/Shader.cpp
@@ -62,6 +63,7 @@ set(ENGINE_HEADERS
     Input/Input.h
     Renderer/Buffer.h
     Renderer/OrthographicCamera.h
+    Renderer/OrthographicCameraController.h
     Renderer/RenderCommand.h
     Renderer/Renderer.h
     Renderer/Shader.h
