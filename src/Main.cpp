@@ -66,8 +66,10 @@ int main() {
 
   auto texture = std::make_shared<Texture2D>("assets/textures/test.png");
 
-  shader->Bind();
-  shader->SetInt("u_Texture", 0);
+  auto material = std::make_shared<Material>(shader);
+  material->SetTexture("u_Texture", texture, 0);
+  material->SetTintColor(
+      {1.0f, 0.5f, 0.5f, 1.0f}); // try {1, 0.5, 0.5, 1} for a red tint
 
   while (running && !window.ShouldClose()) {
     Time::Update();
@@ -81,7 +83,7 @@ int main() {
     texture->Bind(0);
 
     Renderer::BeginScene(cameraController.GetCamera());
-    Renderer::Submit(shader, vertexArray);
+    Renderer::Submit(material, vertexArray);
     Renderer::EndScene();
 
     window.OnUpdate();

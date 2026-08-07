@@ -11,10 +11,11 @@ void Renderer::BeginScene(const OrthographicCamera &camera) {
 
 void Renderer::EndScene() {}
 
-void Renderer::Submit(const std::shared_ptr<Shader> &shader,
+void Renderer::Submit(const std::shared_ptr<Material> &material,
                       const std::shared_ptr<VertexArray> &vertexArray) {
-  shader->Bind();
-  shader->SetMat4("u_ViewProjection", s_SceneData->ViewProjectionMatrix);
+  material->Bind();
+  material->GetShader()->SetMat4("u_ViewProjection",
+                                 s_SceneData->ViewProjectionMatrix);
   RenderCommand::DrawIndexed(vertexArray);
 }
 

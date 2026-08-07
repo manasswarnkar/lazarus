@@ -52,6 +52,7 @@ set(ENGINE_SOURCES
     Platform/Window.cpp
     Input/Input.cpp
     Renderer/Buffer.cpp
+    Renderer/Material.cpp
     Renderer/OrthographicCamera.cpp
     Renderer/OrthographicCameraController.cpp
     Renderer/RenderCommand.cpp
@@ -79,6 +80,7 @@ set(ENGINE_HEADERS
     Input/MouseCodes.h
     Input/Input.h
     Renderer/Buffer.h
+    Renderer/Material.h
     Renderer/OrthographicCamera.h
     Renderer/OrthographicCameraController.h
     Renderer/RenderCommand.h
