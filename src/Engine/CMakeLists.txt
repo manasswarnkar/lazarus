@@ -35,6 +35,7 @@ FetchContent_MakeAvailable(glm)
 
 set(ENGINE_SOURCES
     Core/Logger.cpp
+    Core/Random.cpp
     Core/Timer.cpp
     Core/LinearAllocator.cpp
     Core/UUID.cpp
@@ -52,6 +53,7 @@ set(ENGINE_SOURCES
 
 set(ENGINE_HEADERS
     Core/Logger.h
+    Core/Random.h
     Core/Timer.h
     Core/Assert.h
     Core/LinearAllocator.h

@@ -21,6 +21,7 @@ add_executable(EngineTests
     ViewportMathTest.cpp
     OrthographicCameraTest.cpp
     UUIDTest.cpp
+    RandomTest.cpp
 )
 
 target_link_libraries(EngineTests
