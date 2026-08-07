@@ -33,6 +33,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glm)
 
+# --- stb ---
+FetchContent_Declare(
+    stb
+    GIT_REPOSITORY https://github.com/nothings/stb.git
+    GIT_TAG        master
+)
+FetchContent_MakeAvailable(stb)
+
 set(ENGINE_SOURCES
     Core/FileSystem.cpp
     Core/Logger.cpp
@@ -49,6 +57,7 @@ set(ENGINE_SOURCES
     Renderer/RenderCommand.cpp
     Renderer/Renderer.cpp
     Renderer/Shader.cpp
+    Renderer/Texture.cpp
     Renderer/VertexArray.cpp
 )
 
@@ -75,6 +84,7 @@ set(ENGINE_HEADERS
     Renderer/RenderCommand.h
     Renderer/Renderer.h
     Renderer/Shader.h
+    Renderer/Texture.h
     Renderer/VertexArray.h
 )
 
@@ -83,7 +93,7 @@ add_library(Engine STATIC
     ${ENGINE_HEADERS}
 )
 
-target_include_directories(Engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(Engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}  ${stb_SOURCE_DIR})
 
 target_link_libraries(Engine PUBLIC glfw glad_gl_core glm::glm)
 

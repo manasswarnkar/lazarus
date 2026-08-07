@@ -8,6 +8,7 @@
 #include "Renderer/RenderCommand.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/Shader.h"
+#include "Renderer/Texture.h"
 #include "Renderer/VertexArray.h"
 
 using namespace Engine::Core;
@@ -42,22 +43,32 @@ int main() {
   });
 
   float vertices[] = {
-      -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f,
+      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.0f,
+      0.5f,  0.5f,  0.0f, 1.0f, 1.0f, -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,
   };
-  uint32_t indices[] = {0, 1, 2};
+  uint32_t indices[] = {0, 1, 2, 2, 3, 0};
 
   auto vertexArray = std::make_shared<VertexArray>();
 
   auto vertexBuffer =
       std::make_shared<VertexBuffer>(vertices, sizeof(vertices));
-  vertexBuffer->SetLayout({{ShaderDataType::Float3, "a_Position"}});
+  vertexBuffer->SetLayout({
+      {ShaderDataType::Float3, "a_Position"},
+      {ShaderDataType::Float2, "a_TexCoord"},
+  });
   vertexArray->AddVertexBuffer(vertexBuffer);
 
-  auto indexBuffer = std::make_shared<IndexBuffer>(indices, 3);
+  auto indexBuffer = std::make_shared<IndexBuffer>(indices, 6);
   vertexArray->SetIndexBuffer(indexBuffer);
 
-  auto shader = Shader::CreateFromFiles("assets/shaders/Triangle.vert",
-                                        "assets/shaders/Triangle.frag");
+  auto shader = Shader::CreateFromFiles("assets/shaders/Texture.vert",
+                                        "assets/shaders/Texture.frag");
+
+  auto texture = std::make_shared<Texture2D>("assets/textures/test.png");
+
+  shader->Bind();
+  shader->SetInt("u_Texture", 0);
+
   while (running && !window.ShouldClose()) {
     Time::Update();
     float deltaTime = static_cast<float>(Time::DeltaTime());
@@ -66,6 +77,8 @@ int main() {
 
     RenderCommand::SetClearColor(0.1f, 0.1f, 0.15f, 1.0f);
     RenderCommand::Clear();
+
+    texture->Bind(0);
 
     Renderer::BeginScene(cameraController.GetCamera());
     Renderer::Submit(shader, vertexArray);
