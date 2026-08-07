@@ -20,6 +20,7 @@ add_executable(EngineTests
     BufferLayoutTest.cpp
     ViewportMathTest.cpp
     OrthographicCameraTest.cpp
+    UUIDTest.cpp
 )
 
 target_link_libraries(EngineTests

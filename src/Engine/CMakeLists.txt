@@ -37,6 +37,7 @@ set(ENGINE_SOURCES
     Core/Logger.cpp
     Core/Timer.cpp
     Core/LinearAllocator.cpp
+    Core/UUID.cpp
     Core/ViewportMath.cpp
     Platform/Window.cpp
     Input/Input.cpp
@@ -54,6 +55,7 @@ set(ENGINE_HEADERS
     Core/Timer.h
     Core/Assert.h
     Core/LinearAllocator.h
+    Core/UUID.h
     Core/ViewportMath.h
     Platform/Window.h
     Events/Event.h
