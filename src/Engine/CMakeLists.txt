@@ -34,6 +34,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(glm)
 
 set(ENGINE_SOURCES
+    Core/FileSystem.cpp
     Core/Logger.cpp
     Core/Random.cpp
     Core/Timer.cpp
@@ -52,6 +53,7 @@ set(ENGINE_SOURCES
 )
 
 set(ENGINE_HEADERS
+    Core/FileSystem.h
     Core/Logger.h
     Core/Random.h
     Core/Timer.h

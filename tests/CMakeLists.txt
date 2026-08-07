@@ -12,6 +12,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 add_executable(EngineTests
+    FileSystemTest.cpp
     TimerTest.cpp
     AssertTest.cpp
     LinearAllocatorTest.cpp
