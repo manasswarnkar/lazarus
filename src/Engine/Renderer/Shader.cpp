@@ -1,5 +1,6 @@
 #include "Shader.h"
 #include "Core/Assert.h"
+#include "Core/FileSystem.h"
 #include "Core/Logger.h"
 
 #include <glad/gl.h>
@@ -92,6 +93,20 @@ void Shader::SetFloat4(const std::string &name, float v0, float v1, float v2,
 
 void Shader::SetMat4(const std::string &name, const glm::mat4 &matrix) {
   glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]);
+}
+
+std::shared_ptr<Shader>
+Shader::CreateFromFiles(const std::string &vertexPath,
+                        const std::string &fragmentPath) {
+  auto vertexSrc = Core::FileSystem::ReadFileToString(vertexPath);
+  ENGINE_ASSERT(vertexSrc.has_value(),
+                ("Failed to read vertex shader: " + vertexPath).c_str());
+
+  auto fragmentSrc = Core::FileSystem::ReadFileToString(fragmentPath);
+  ENGINE_ASSERT(fragmentSrc.has_value(),
+                ("Failed to read fragment shader: " + fragmentPath).c_str());
+
+  return std::make_shared<Shader>(*vertexSrc, *fragmentSrc);
 }
 
 } // namespace Engine::Renderer

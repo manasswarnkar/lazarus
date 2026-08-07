@@ -56,25 +56,8 @@ int main() {
   auto indexBuffer = std::make_shared<IndexBuffer>(indices, 3);
   vertexArray->SetIndexBuffer(indexBuffer);
 
-  std::string vertexSrc = R"(
-    #version 450 core
-    layout(location = 0) in vec3 a_Position;
-    uniform mat4 u_ViewProjection;
-    void main() {
-      gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
-    }
-  )";
-
-  std::string fragmentSrc = R"(
-    #version 450 core
-    layout(location = 0) out vec4 color;
-    void main() {
-      color = vec4(0.9, 0.4, 0.2, 1.0);
-    }
-  )";
-
-  auto shader = std::make_shared<Shader>(vertexSrc, fragmentSrc);
-
+  auto shader = Shader::CreateFromFiles("assets/shaders/Triangle.vert",
+                                        "assets/shaders/Triangle.frag");
   while (running && !window.ShouldClose()) {
     Time::Update();
     float deltaTime = static_cast<float>(Time::DeltaTime());
